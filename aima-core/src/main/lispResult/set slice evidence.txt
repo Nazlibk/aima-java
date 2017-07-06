@@ -1,0 +1,60 @@
+"********start*****" 
+"current-t" 
+0 
+"finish-time" 
+1 
+"nodes-per-slice" 
+6 
+"lslice-evidence-input" 
+#(NIL NIL NIL NIL NIL NIL) 
+"continuous-evidence" 
+#() 
+"lslice-evidence-output" 
+#(NIL NIL NIL NIL NIL NIL) 
+"*****end*****" 
+"Initializing Phi-inverse table" 
+"Initializing Phi table" 
+"Initializing Phi table exit" 
+"5" 
+"********start*****" 
+"current-t" 
+1.0 
+"finish-time" 
+10.0 
+"nodes-per-slice" 
+6 
+"lslice-evidence-input" 
+#(NIL NIL NIL NIL NIL NIL) 
+"continuous-evidence" 
+#() 
+"lslice-evidence-output" 
+#(NIL NIL NIL NIL NIL NIL) 
+"*****end*****" 
+"********start*****" 
+"current-t" 
+5.538211766728854d-4 
+"finish-time" 
+10.0 
+"nodes-per-slice" 
+6 
+"lslice-evidence-input" 
+#(NIL NIL NIL NIL NIL NIL) 
+"continuous-evidence" 
+#() 
+"lslice-evidence-output" 
+#(NIL NIL NIL NIL NIL NIL) 
+"*****end*****" 
+"********start*****" 
+"current-t" 
+0.0013845529416822136d0 
+"finish-time" 
+10.0 
+"nodes-per-slice" 
+6 
+"lslice-evidence-input" 
+#(NIL NIL NIL NIL NIL NIL) 
+"continuous-evidence" 
+#() 
+"lslice-evidence-output" 
+#(NIL NIL NIL NIL NIL NIL) 
+"*****end*****"
