@@ -72,4 +72,8 @@ public interface DynamicBayesianNetwork extends BayesianNetwork {
 	 *         <b>X</b><sub>1</sub>).
 	 */
 	Set<RandomVariable> getE_1();
+
+	//Nazli start
+	Set<RandomVariable> getX_11();
+	//Nazli end
 }
