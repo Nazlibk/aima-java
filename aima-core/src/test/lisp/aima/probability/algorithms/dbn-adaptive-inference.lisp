@@ -80,8 +80,8 @@
            )
 
 ;;Nazli
-(print "dbn")
-(print dbn)
+;;(print "dbn")
+;;(print dbn)
 		  
       ;; initialize shared variables
       (apf-init dbn :N N :queries queries :percentile-query-list percentile-query-list)
@@ -98,8 +98,8 @@
             (setf next-summary-t (get-next-t current-t summary-interval))
             (if (> next-summary-t finish-time ) (setf next-summary-t finish-time))
 ;;Nazli
-(print "ps")
-(print ps)
+;;(print "ps")
+;;(print ps)
             ;; Run each particle forward to next summary step
             (LOOP FOR p FROM 0 TO (- N 1) DO
                   (let* ((particle (aref ps p))
@@ -264,8 +264,9 @@
           FOR s = (aref ws 0) THEN (+ s (aref ws i))
           DO (setf (aref cumu-dist i) s))
 ;;Nazli
-(print "cumu-dist")
-(print cumu-dist)
+;;(print "cumu-dist")
+;;(print cumu-dist)
+
     (setf (aref cumu-dist (-- (length ws))) 1) ;; ensure the last entry is >= 1
     (let ((cdi 0)) ;; cdi is cumu-dist-index
       (loop FOR bucket-min FROM 0 TO (- 1 bucket-size) BY bucket-size
@@ -374,15 +375,15 @@
     "Filter one timestep using evidence provided as a list (w/ one value or NIL per node)"  
 
 ;;Nazli
-(print "*****start*****")
-(print "particle")
-(print particle)
-(print "step-size")
-(print step-size)
-(print "slice-evidence")
-(print slice-evidence)
-(print "defined-step")
-(print defined-step)
+;;(print "*****start*****")
+;;(print "particle")
+;;(print particle)
+;;(print "step-size")
+;;(print step-size)
+;;(print "slice-evidence")
+;;(print slice-evidence)
+;;(print "defined-step")
+;;(print defined-step)
  
     (let ((nodes (dbn-slice1 dbn))
           (first-particle-index nodes-per-slice)
@@ -390,29 +391,29 @@
           )
 
 ;;Nazli
-(print "nodes")
-(print nodes)
-(print "dbn")
-(print dbn)
+;;(print "nodes")
+;;(print nodes)
+;;(print "dbn")
+;;(print dbn)
 ;;(print "dbn-slice1")
 ;;(print dbn-slice1)
-(print "nodes-per-slice")
-(print nodes-per-slice)
+;;(print "nodes-per-slice")
+;;(print nodes-per-slice)
 
       (setf deltastep step-size) ;; specifially for dbn odes
       (loop FOR node IN nodes AND node-value across slice-evidence 
             AND i UPFROM first-particle-index DO
 
 ;;Nazli
-(print "node")
-(print node)
+;;(print "node")
+;;(print node)
             (if (null node-value)
                 (setf (aref particle i) (sample node particle scale-factor)) ;; need to add "scaling factor" to Sample based on step size DBN definition for gaussian nodes	           
                 (setf (aref particle i) node-value)
                 ) ;; end if
 ;;Nazli
-(print "particle")
-(print particle)
+;;(print "particle")
+;;(print particle)
 
             ) ;; end loop  
       )
