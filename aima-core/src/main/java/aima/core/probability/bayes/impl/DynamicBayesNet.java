@@ -25,6 +25,7 @@ public class DynamicBayesNet extends BayesNet implements DynamicBayesianNetwork 
 	private Map<RandomVariable, RandomVariable> X_1_to_X_0 = new LinkedHashMap<RandomVariable, RandomVariable>();
 	//Nazli start
 	private Map<RandomVariable, RandomVariable> X_1_to_X_1 = new LinkedHashMap<RandomVariable, RandomVariable>();
+	private List<RandomVariable> variablesInTopologicalOrder = new ArrayList<RandomVariable>();
 	//Nazli end
 	private BayesianNetwork priorNetwork = null;
 	private List<RandomVariable> X_1_VariablesInTopologicalOrder = new ArrayList<RandomVariable>();
@@ -105,6 +106,7 @@ public class DynamicBayesNet extends BayesNet implements DynamicBayesianNetwork 
 
 		X_1_VariablesInTopologicalOrder
 				.addAll(getVariablesInTopologicalOrder());
+		variablesInTopologicalOrder = X_1_VariablesInTopologicalOrder;
 		X_1_VariablesInTopologicalOrder.removeAll(X_0);
 		X_1_VariablesInTopologicalOrder.removeAll(E_1);
 	}

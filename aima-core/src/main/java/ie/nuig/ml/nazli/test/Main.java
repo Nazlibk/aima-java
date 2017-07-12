@@ -12,13 +12,13 @@ public class Main {
 
     public static void main(String... args){
 
-        Interpreter interpreter = Interpreter.createInstance();
-        LispObject result = interpreter.eval("(+ 2 3)");
-        System.out.println(result.getClass().getName());
-        if(result instanceof Fixnum) {
-            Fixnum fixnum = (Fixnum) result;
-            System.out.println(fixnum.value);
-        }
+//        Interpreter interpreter = Interpreter.createInstance();
+//        LispObject result = interpreter.eval("(+ 2 3)");
+//        System.out.println(result.getClass().getName());
+//        if(result instanceof Fixnum) {
+//            Fixnum fixnum = (Fixnum) result;
+//            System.out.println(fixnum.value);
+//        }
 
         //BayesianNetwork bayesianNetwork = BayesNetExampleFactory.constructBurglaryAlarmNetwork();
         //List<RandomVariable> topologicalOrder = bayesianNetwork.getVariablesInTopologicalOrder();

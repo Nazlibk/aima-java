@@ -24,6 +24,4 @@ public class ProbabilityDistributedFunction extends AbstractContinuousDomain {
     public boolean isOrdered() {
         return false;
     }
-
-
 }

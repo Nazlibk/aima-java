@@ -64,8 +64,7 @@ public class ParticleFilterUtilsTest {
 
     @Test
     public void test_setSliceEvidence_must_return_array_of_zero(){
-        //regardless of currentT and finishTime values, setSliceEvidence return array of zeros (because of
-        // some ifs in the code)
+        //regardless of currentT and finishTime values, setSliceEvidence return array of zeros (because of some ifs in the code)
         int currentT = 0;
         int finishTime = 1;
         double[] result = particleFilterUtils.setSliceEvidence(currentT, finishTime);
