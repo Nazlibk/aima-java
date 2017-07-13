@@ -139,6 +139,39 @@ public class ParticleFiltering {
 		return S;
 	}
 
+	//Nazli start
+	public AssignmentProposition[][] particleFiltering(AssignmentProposition[] e, Object expected) {
+		// local variables: W, a vector of weights of size N
+		double[] W = new double[N];
+
+		if(expected instanceof String){
+			for(int i = 0; i < W.length; i++){
+				sampleFromTransitionModel(i);
+				W[i] = 1.0/N;
+			}
+		}else{
+			// for i = 1 to N do
+			for (int i = 0; i < N; i++) {
+				/* step 1 */
+				// S[i] <- sample from <b>P</b>(<b>X</b><sub>1</sub> |
+				// <b>X</b><sub>0</sub> = S[i])
+				sampleFromTransitionModel(i);
+				/* step 2 */
+				// W[i] <- <b>P</b>(<b>e</b> | <b>X</b><sub>1</sub> = S[i])
+				//W[i] = sensorModel.posterior(ProbUtil.constructConjunction(e), S_tp1[i]);
+				//if(expected instanceof Double){
+					W[i] = ((Double) e[0].getValue()).doubleValue()/((double) expected);
+			}
+		}
+		/* step 3 */
+		// S <- WEIGHTED-SAMPLE-WITH-REPLACEMENT(N, S, W)
+		S = weightedSampleWithReplacement(N, S, W);
+
+		// return S
+		return S;
+	}
+	//Nazli end
+
 	/**
 	 * Reset this instances persistent variables to be used between called to
 	 * particleFiltering().

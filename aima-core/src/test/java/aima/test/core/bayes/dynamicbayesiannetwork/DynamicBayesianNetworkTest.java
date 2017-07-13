@@ -120,7 +120,7 @@ public class DynamicBayesianNetworkTest {
         int numberOfNoes = dbn.getX_1().size() + dbn.getX_0().size() + dbn.getX_11().size();
         double[] randomNumbers = new double[numberOfNoes * N * timeStep];
         for(int i = 0; i < randomNumbers.length; i++){
-            randomNumbers[i] = g.sample();
+            randomNumbers[i] = Math.random();
         }
         mr = new MockRandomizer(randomNumbers);
     }
@@ -248,13 +248,16 @@ public class DynamicBayesianNetworkTest {
     public void test_vanderpol_dbn(){
         int timeStep = 2;
         double stepSize = 1/120;
-        double[] y1 = new double[timeStep];
-        double[] y2 = new double[timeStep];
+        double[] y1 = new double[timeStep + 1];
+        double[] y2 = new double[timeStep + 1];
+        double[] sampledY1 = new double[timeStep];
+        double[] sampledY2 = new double[timeStep];
         int N = 10;
         double epsilon = 0.1;
         double a = 0.5;
         double deltaY1;
         double deltaY2;
+        double sum = 0;
 
         y1[0] = 1.0;
         y2[0] = 1.0;
@@ -266,10 +269,21 @@ public class DynamicBayesianNetworkTest {
             deltaY2 = dbnGenerator.deltaY2(a, y1[i]);
             evidenceY1 = new AssignmentProposition[]{new AssignmentProposition(observedy1_t1_RV, y1[i])};
             System.out.println("Sample set " + (i + 1) + ":");
-            AssignmentProposition[][] S = pf.particleFiltering(evidenceY1);
-            for (int j = 0; j < N; j++) {
-                System.out.println("Sample " + (j + 1) + " = " + S[j][0]);
+            AssignmentProposition[][] S;
+            if(i == 0){
+                S = pf.particleFiltering(evidenceY1, "First time step");
+            }else {
+                S = pf.particleFiltering(evidenceY1, sampledY1[i - 1]);
             }
+            for (int j = 0; j < N; j++) {
+                System.out.println("Sample " + (j + 1) + " = " + S[j][5]);
+            }
+            for(int j = 0; j < S.length; j++){
+                sum += (double) S[j][5].getValue();
+            }
+            sampledY1[i] = sum/S.length;
+            System.out.println("Final value obtained from samples in run number "
+                    + (i + 1) + " is: " + sampledY1[i]);
             i++;
             y1[i] = dbnGenerator.y1_1(deltaY1, y1[i - 1], stepSize);
             y2[i] = dbnGenerator.y2_1(deltaY2, y2[i - 1], stepSize);
