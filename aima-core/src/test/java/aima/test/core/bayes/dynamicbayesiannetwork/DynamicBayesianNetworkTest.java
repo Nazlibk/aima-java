@@ -6,23 +6,23 @@ import aima.core.probability.bayes.DynamicBayesianNetwork;
 import aima.core.probability.bayes.Node;
 import aima.core.probability.bayes.approx.ParticleFiltering;
 import aima.core.probability.bayes.impl.BayesNet;
-import aima.core.probability.bayes.impl.DynamicBayesNet;
 import aima.core.probability.proposition.AssignmentProposition;
 import aima.core.probability.util.RandVar;
 import aima.core.util.MockRandomizer;
 import ie.nuig.ml.bayes.ContinuousNodeImpl;
 import ie.nuig.ml.bayes.ProbabilityDistributedFunction;
-import ie.nuig.ml.bayes.dynamicbayesiannetwork.DBNGenerator;
+import ie.nuig.ml.bayes.dynamicbayesiannetwork.DBNUtilities;
+import ie.nuig.ml.bayes.dynamicbayesiannetwork.EvidenceReadFromCsv;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.RealDistribution;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.*;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -30,8 +30,10 @@ import static org.junit.Assert.assertThat;
  */
 public class DynamicBayesianNetworkTest {
 
+    double epsilon = 0.1;
+    double a = 0.5;
     MockRandomizer mr;
-    DBNGenerator dbnGenerator;
+    DBNUtilities dbnUtilities;
     private DynamicBayesianNetwork dbn;
 
     RealDistribution g = new NormalDistribution();
@@ -53,66 +55,8 @@ public class DynamicBayesianNetworkTest {
     @Before
     public void setup(){
 
-        dbnGenerator = new DBNGenerator();
-        //prior nodes
-        Node a_tm1 = new ContinuousNodeImpl(a_t0_RV);
-        Node y1_tm1 = new ContinuousNodeImpl(y1_t0_RV);
-        Node epsilon_tm1 = new ContinuousNodeImpl(epsilon_t0_RV);
-        Node y2_tm1 = new ContinuousNodeImpl(y2_t0_RV);
-        Node deltay1_tm1 = new ContinuousNodeImpl(deltay1_t0_RV, y1_tm1, epsilon_tm1, y2_tm1);
-        Node deltay2_tm1 = new ContinuousNodeImpl(deltay2_t0_RV, a_tm1, y1_tm1);
-        //main nodes
-        Node a_t0 = new ContinuousNodeImpl(a_t0_RV);
-        Node y1_t0 = new ContinuousNodeImpl(y1_t0_RV);
-        Node epsilon_t0 = new ContinuousNodeImpl(epsilon_t0_RV);
-        Node y2_t0 = new ContinuousNodeImpl(y2_t0_RV);
-        Node deltay1_t0 = new ContinuousNodeImpl(deltay1_t0_RV, y1_t0, epsilon_t0, y2_t0);
-        Node deltay2_t0 = new ContinuousNodeImpl(deltay2_t0_RV, a_t0, y1_t0);
-        Node a_t = new ContinuousNodeImpl(a_t1_RV, a_t0);
-        Node y1_t = new ContinuousNodeImpl(y1_t1_RV, y1_t0, deltay1_t0);
-        Node epsilon_t = new ContinuousNodeImpl(epsilon_t1_RV, epsilon_t0);
-        Node y2_t = new ContinuousNodeImpl(y2_t1_RV, y2_t0, deltay2_t0);
-        Node deltay1_t = new ContinuousNodeImpl(deltay1_t1_RV, y1_t, epsilon_t, y2_t);
-        Node deltay2_t = new ContinuousNodeImpl(deltay2_t1_RV, a_t, y1_t);
-        Node observedy1_t = new ContinuousNodeImpl(observedy1_t1_RV, y1_t);
-
-        List<Node> priorNodesList = new ArrayList<>();
-        priorNodesList.add(a_tm1);
-        priorNodesList.add(y1_tm1);
-        priorNodesList.add(epsilon_tm1);
-        priorNodesList.add(y2_tm1);
-
-        Node[] priorNodes = priorNodesList.toArray(new Node[]{});
-        BayesianNetwork priorNetwork = new BayesNet(priorNodes);
-
-        List<Node> rootNodesList = new ArrayList<>();
-        rootNodesList.add(a_t0);
-        rootNodesList.add(y1_t0);
-        rootNodesList.add(epsilon_t0);
-        rootNodesList.add(y2_t0);
-
-        Node[] rootNodes = rootNodesList.toArray(new Node[]{});
-
-
-
-        Map<RandomVariable, RandomVariable> X_0_to_X_1 = new HashMap<RandomVariable, RandomVariable>();
-        X_0_to_X_1.put(a_t0_RV, a_t1_RV);
-        X_0_to_X_1.put(epsilon_t0_RV, epsilon_t1_RV);
-        X_0_to_X_1.put(y1_t0_RV, y1_t1_RV);
-        X_0_to_X_1.put(y2_t0_RV, y2_t1_RV);
-        X_0_to_X_1.put(deltay1_t0_RV, y1_t1_RV);
-        X_0_to_X_1.put(deltay2_t0_RV, y2_t1_RV);
-
-        Map<RandomVariable, RandomVariable> X_1_to_X_1 = new HashMap<RandomVariable, RandomVariable>();
-        X_1_to_X_1.put(a_t1_RV, deltay2_t1_RV);
-        X_1_to_X_1.put(y1_t1_RV, deltay2_t1_RV);
-        X_1_to_X_1.put(epsilon_t1_RV, deltay1_t1_RV);
-        X_1_to_X_1.put(y2_t1_RV, deltay1_t1_RV);
-
-        Set<RandomVariable> E_1 = new HashSet<RandomVariable>();
-        E_1.add(observedy1_t1_RV);
-
-        dbn = new DynamicBayesNet(priorNetwork, X_0_to_X_1, X_1_to_X_1, E_1, rootNodes);
+        dbnUtilities = new DBNUtilities();
+        dbn = dbnUtilities.dbnGenerator();
 
         //randomizer
         int N = 10;
@@ -131,7 +75,7 @@ public class DynamicBayesianNetworkTest {
         double epsilon = 0.1;
         double y1 = 0.5;
         double y2 = 0.7;
-        double result = dbnGenerator.deltaY1(epsilon, y1, y2);
+        double result = dbnUtilities.deltaY1(epsilon, y1, y2);
         assertThat(result, is(11.583333333333332));
     }
 
@@ -141,7 +85,7 @@ public class DynamicBayesianNetworkTest {
         double epsilon = 0;
         double y1 = 0;
         double y2 = 0.7;
-        double result = dbnGenerator.deltaY1(epsilon, y1, y2);
+        double result = dbnUtilities.deltaY1(epsilon, y1, y2);
         assertThat(result, is(Math.abs(Double.POSITIVE_INFINITY)));
     }
 
@@ -150,7 +94,7 @@ public class DynamicBayesianNetworkTest {
         //Equation = a - y1
         double a = 0.5;
         double y1 = 0.3;
-        double result = dbnGenerator.deltaY2(a, y1);
+        double result = dbnUtilities.deltaY2(a, y1);
         assertThat(result, is(a - y1));
     }
 
@@ -160,7 +104,7 @@ public class DynamicBayesianNetworkTest {
         double h0 = 1/120;
         double y1_0 = 1;
         double deltaY1_0 = 120;
-        double result = dbnGenerator.y1_1(deltaY1_0, y1_0, h0);
+        double result = dbnUtilities.y1_1(deltaY1_0, y1_0, h0);
         assertThat(result, is((deltaY1_0 * h0) + y1_0));
     }
 
@@ -170,7 +114,7 @@ public class DynamicBayesianNetworkTest {
         double h0 = 1/120;
         double y2_0 = 1;
         double deltaY2_0 = 120;
-        double result = dbnGenerator.y1_1(deltaY2_0, y2_0, h0);
+        double result = dbnUtilities.y1_1(deltaY2_0, y2_0, h0);
         assertThat(result, is((deltaY2_0 * h0) + y2_0));
     }
 
@@ -180,7 +124,7 @@ public class DynamicBayesianNetworkTest {
         double var0 = 0.6;
         double deltaStep = 0.5;
         double delta0 = 0.7;
-        double result = dbnGenerator.Y2_1andY1_1(delta0, var0, deltaStep);
+        double result = dbnUtilities.Y2_1andY1_1(delta0, var0, deltaStep);
         assertThat(result, is(var0 + deltaStep * delta0));
     }
 
@@ -246,49 +190,70 @@ public class DynamicBayesianNetworkTest {
 
     @Test
     public void test_vanderpol_dbn(){
-        int timeStep = 2;
-        double stepSize = 1/120;
+        double stepSize = 1.0/164;
+        int timeStep = 10;
+        //int timeStep = (int)(10/stepSize);
         double[] y1 = new double[timeStep + 1];
         double[] y2 = new double[timeStep + 1];
         double[] sampledY1 = new double[timeStep];
         double[] sampledY2 = new double[timeStep];
-        int N = 10;
-        double epsilon = 0.1;
-        double a = 0.5;
+        int N = 1000;
         double deltaY1;
         double deltaY2;
         double sum = 0;
+        List<Double> time = new ArrayList<>(Arrays.asList(0.4, 1.2, 2.0, 2.7, 3.1, 4.6, 5.2, 6.1, 7.8, 8.2, 9.5));
 
         y1[0] = 1.0;
         y2[0] = 1.0;
         ParticleFiltering pf = new ParticleFiltering(N, dbn, mr);
         AssignmentProposition[] evidenceY1;
+        AssignmentProposition[] evidenceY2;
+        AssignmentProposition[][] S;
         int i = 0;
         do{
-            deltaY1 = dbnGenerator.deltaY1(epsilon, y1[i], y2[i]);
-            deltaY2 = dbnGenerator.deltaY2(a, y1[i]);
+            deltaY1 = dbnUtilities.deltaY1(epsilon, y1[i], y2[i]);
+            deltaY2 = dbnUtilities.deltaY2(a, y1[i]);
             evidenceY1 = new AssignmentProposition[]{new AssignmentProposition(observedy1_t1_RV, y1[i])};
-            System.out.println("Sample set " + (i + 1) + ":");
-            AssignmentProposition[][] S;
+            evidenceY2 = new AssignmentProposition[]{new AssignmentProposition(y2_t1_RV, y2[i])};
+
+            //y1 calculation
             if(i == 0){
                 S = pf.particleFiltering(evidenceY1, "First time step");
             }else {
                 S = pf.particleFiltering(evidenceY1, sampledY1[i - 1]);
             }
-            for (int j = 0; j < N; j++) {
-                System.out.println("Sample " + (j + 1) + " = " + S[j][5]);
-            }
             for(int j = 0; j < S.length; j++){
                 sum += (double) S[j][5].getValue();
             }
             sampledY1[i] = sum/S.length;
-            System.out.println("Final value obtained from samples in run number "
-                    + (i + 1) + " is: " + sampledY1[i]);
+            sum = 0;
+
+            //y2 calculation
+            if(i == 0){
+                S = pf.particleFiltering(evidenceY2, "First time step");
+            }else {
+                S = pf.particleFiltering(evidenceY2, sampledY2[i - 1]);
+            }
+            for(int j = 0; j < S.length; j++){
+                sum += (double) S[j][4].getValue();
+            }
+            sampledY2[i] = sum/S.length;
+            sum = 0;
+
             i++;
-            y1[i] = dbnGenerator.y1_1(deltaY1, y1[i - 1], stepSize);
-            y2[i] = dbnGenerator.y2_1(deltaY2, y2[i - 1], stepSize);
+            y1[i] = dbnUtilities.y1_1(deltaY1, y1[i - 1], stepSize);
+            y2[i] = dbnUtilities.y2_1(deltaY2, y2[i - 1], stepSize);
 
         }while (i < timeStep);
+        System.out.println("Last sample for y1 is: " + sampledY1[sampledY1.length - 1]);
+        System.out.println("Last sample for y2 is: " + sampledY2[sampledY2.length - 1]);
+    }
+
+    @Test
+    public void test_evidenceReadFromCsv() throws IOException{
+        EvidenceReadFromCsv evidenceReadFromCsv = dbnUtilities.readFromCsv();
+        System.out.println("Times:" + evidenceReadFromCsv.getTime());
+        System.out.println("Values:" + evidenceReadFromCsv.getValues());
     }
 
     @After

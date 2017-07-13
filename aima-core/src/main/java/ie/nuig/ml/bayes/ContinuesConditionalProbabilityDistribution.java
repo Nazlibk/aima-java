@@ -23,15 +23,14 @@ public class ContinuesConditionalProbabilityDistribution implements ConditionalP
     private LinkedHashSet<RandomVariable> continuousParents = new LinkedHashSet<RandomVariable>();
     private List<Double> offset = new ArrayList<>();
     private List<Double> mean = new ArrayList<>();
-    //private List<Object> onDomain = new ArrayList<Object>();
 
     public ContinuesConditionalProbabilityDistribution(RealDistribution realDistribution) {
         this.realDistribution = realDistribution;
-        //if(realDistribution.equals(new NormalDistribution())){
+        if(realDistribution instanceof NormalDistribution){
             NormalDistribution normalDistribution = (NormalDistribution) realDistribution;
             offset.add(normalDistribution.getStandardDeviation());
             mean.add(normalDistribution.getMean());
-        //}
+        }
     }
 
     public ContinuesConditionalProbabilityDistribution(RealDistribution realDistribution,
@@ -49,22 +48,25 @@ public class ContinuesConditionalProbabilityDistribution implements ConditionalP
                 continuousParents.add(rv);
             }
         }
-        //if(realDistribution.equals(new NormalDistribution())){
+        if(realDistribution instanceof NormalDistribution){
             NormalDistribution normalDistribution = (NormalDistribution) realDistribution;
             offset.add(normalDistribution.getStandardDeviation());
             mean.add(normalDistribution.getMean());
-        //}
+        }
 
     }
 
     @Override
     public RandomVariable getOn() {
-        throw new UnsupportedOperationException("not implemented yet <getOn>");
+        return this.on;
     }
 
     @Override
     public Set<RandomVariable> getParents() {
-        throw new UnsupportedOperationException("not implemented yet <getParents>");
+        LinkedHashSet<RandomVariable> parents = new LinkedHashSet<RandomVariable>();
+        parents.addAll(discreteParents);
+        parents.addAll(continuousParents);
+        return parents;
     }
 
     @Override

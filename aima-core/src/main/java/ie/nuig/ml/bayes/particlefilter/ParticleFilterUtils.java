@@ -74,7 +74,6 @@ public class ParticleFilterUtils {
         priorNodesList.add(y1_tm1);
         priorNodesList.add(epsilon_tm1);
         priorNodesList.add(y2_tm1);
-
         Node[] priorNodes = priorNodesList.toArray(new Node[]{});
         BayesianNetwork priorNetwork = new BayesNet(priorNodes);
 
@@ -83,10 +82,7 @@ public class ParticleFilterUtils {
         rootNodesList.add(y1_t0);
         rootNodesList.add(epsilon_t0);
         rootNodesList.add(y2_t0);
-
         Node[] rootNodes = rootNodesList.toArray(new Node[]{});
-
-
 
         Map<RandomVariable, RandomVariable> X_0_to_X_1 = new HashMap<RandomVariable, RandomVariable>();
         X_0_to_X_1.put(a_t0_RV, a_t1_RV);
@@ -106,7 +102,7 @@ public class ParticleFilterUtils {
         E_1.add(observedy1_t1_RV);
 
         dbn = new DynamicBayesNet(priorNetwork, X_0_to_X_1, X_1_to_X_1, E_1, rootNodes);
-        return  dbn;
+            return  dbn;
     }
 
     public ToleranceCheckResult checkTolerance(List<Double> particle, List<Integer> nodes, double tolerance, double stepSize) {
