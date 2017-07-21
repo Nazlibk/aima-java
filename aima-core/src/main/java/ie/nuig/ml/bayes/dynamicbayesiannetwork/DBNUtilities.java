@@ -9,11 +9,11 @@ import aima.core.probability.bayes.impl.DynamicBayesNet;
 import aima.core.probability.util.RandVar;
 import ie.nuig.ml.bayes.ContinuousNodeImpl;
 import ie.nuig.ml.bayes.ProbabilityDistributedFunction;
+import org.apache.commons.math3.distribution.ConstantRealDistribution;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.RealDistribution;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,23 +26,25 @@ import java.util.*;
 public class DBNUtilities {
 
     public DynamicBayesianNetwork dbnGenerator(){
+
         DynamicBayesianNetwork dbn;
+        double epsilon = 0.1;
+        double a = 0.5;
+        double stepSize = 1.0/164.0;
 
-        RealDistribution g = new NormalDistribution();
-
-        final RandVar a_t0_RV = new RandVar("A_t0_RV", new ProbabilityDistributedFunction(g));
-        final RandVar a_t1_RV = new RandVar("A_t1_RV", new ProbabilityDistributedFunction(g));
-        final RandVar epsilon_t0_RV = new RandVar("Epsilon_t0_RV", new ProbabilityDistributedFunction(g));
-        final RandVar epsilon_t1_RV = new RandVar("Epsilon_t1_RV", new ProbabilityDistributedFunction(g));
-        final RandVar y1_t0_RV = new RandVar("Y1_t0_RV", new ProbabilityDistributedFunction(g));
-        final RandVar y1_t1_RV = new RandVar("Y1_t1_RV", new ProbabilityDistributedFunction(g));
-        final RandVar y2_t0_RV = new RandVar("Y2_t0_RV", new ProbabilityDistributedFunction(g));
-        final RandVar y2_t1_RV = new RandVar("Y2_t1_RV", new ProbabilityDistributedFunction(g));
-        final RandVar deltay1_t1_RV = new RandVar("Deltay1_t1_RV", new ProbabilityDistributedFunction(g));
-        final RandVar deltay1_t0_RV = new RandVar("Deltay1_t0_RV", new ProbabilityDistributedFunction(g));
-        final RandVar deltay2_t1_RV = new RandVar("Deltay2_t1_RV", new ProbabilityDistributedFunction(g));
-        final RandVar deltay2_t0_RV = new RandVar("Deltay2_t0_RV", new ProbabilityDistributedFunction(g));
-        final RandVar observedy1_t1_RV = new RandVar("Observedy1_t1_RV", new ProbabilityDistributedFunction(g));
+        final RandVar a_t0_RV = new RandVar("A_t0_RV", new ProbabilityDistributedFunction(new ConstantRealDistribution(a)));
+        final RandVar a_t1_RV = new RandVar("A_t1_RV", new ProbabilityDistributedFunction(new ConstantRealDistribution(a)));
+        final RandVar epsilon_t0_RV = new RandVar("Epsilon_t0_RV", new ProbabilityDistributedFunction(new ConstantRealDistribution(epsilon)));
+        final RandVar epsilon_t1_RV = new RandVar("Epsilon_t1_RV", new ProbabilityDistributedFunction(new ConstantRealDistribution(epsilon)));
+        final RandVar y1_t0_RV = new RandVar("Y1_t0_RV", new ProbabilityDistributedFunction(new ConstantRealDistribution(1.0)));
+        final RandVar y1_t1_RV = new RandVar("Y1_t1_RV", new ProbabilityDistributedFunction(new ConstantRealDistribution(y((5.0/3.0)/epsilon, 1, stepSize))));
+        final RandVar y2_t0_RV = new RandVar("Y2_t0_RV", new ProbabilityDistributedFunction(new ConstantRealDistribution(1.0)));
+        final RandVar y2_t1_RV = new RandVar("Y2_t1_RV", new ProbabilityDistributedFunction(new ConstantRealDistribution(y(0.5, 1, stepSize))));
+        final RandVar deltay1_t1_RV = new RandVar("Deltay1_t1_RV", new ProbabilityDistributedFunction(new ConstantRealDistribution(deltaY1(epsilon, 1.0, 1.0))));
+        final RandVar deltay1_t0_RV = new RandVar("Deltay1_t0_RV", new ProbabilityDistributedFunction(new ConstantRealDistribution(deltaY1(epsilon, 1.0, 1.0))));
+        final RandVar deltay2_t1_RV = new RandVar("Deltay2_t1_RV", new ProbabilityDistributedFunction(new ConstantRealDistribution(deltaY2(a, 1.0))));
+        final RandVar deltay2_t0_RV = new RandVar("Deltay2_t0_RV", new ProbabilityDistributedFunction(new ConstantRealDistribution(deltaY2(a, 1.0))));
+        final RandVar observedy1_t1_RV = new RandVar("Observedy1_t1_RV", new ProbabilityDistributedFunction(new NormalDistribution()));
 
         //prior nodes
         Node a_tm1 = new ContinuousNodeImpl(a_t0_RV);
@@ -104,7 +106,7 @@ public class DBNUtilities {
 
     private static final String fileName = "evidence.csv";
 
-    public EvidenceReadFromCsv readFromCsv() throws IOException{
+    public CsvEvidenceReader readFromCsv() throws IOException{
 
         List<String> s = new ArrayList<>();
         String tmp;
@@ -113,7 +115,7 @@ public class DBNUtilities {
             List<Double> time = new ArrayList<>();
             List<Double> values =  new ArrayList<>();
             List<String> oneRow = new ArrayList<>();
-            EvidenceReadFromCsv evidenceReadFromCsv;
+            CsvEvidenceReader csvEvidenceReader;
             while ((tmp = reader.readLine()) != null) {
                 s.add(tmp);
             }
@@ -123,8 +125,8 @@ public class DBNUtilities {
                 time.add(Double.valueOf(oneRow.get(0)));
                 values.add(Double.valueOf(oneRow.get(1)));
             }
-            evidenceReadFromCsv = new EvidenceReadFromCsv(time, values);
-            return evidenceReadFromCsv;
+            csvEvidenceReader = new CsvEvidenceReader(time, values);
+            return csvEvidenceReader;
         }
     }
 
@@ -137,9 +139,7 @@ public class DBNUtilities {
         return a - y1;
     }
 
-    public double y1_1(double deltaY1_0, double y1_0, double stepsize){ return (deltaY1_0 * stepsize) + y1_0;}
-
-    public double y2_1(double deltaY2_0, double y2_0, double stepsize){ return (deltaY2_0 * stepsize) + y2_0;}
+    public double y(double deltaY, double y, double stepsize){ return (deltaY * stepsize) + y;}
 
     public double Y2_1andY1_1(double delta0, double var0, double deltaStep){
         return var0 + deltaStep * delta0;

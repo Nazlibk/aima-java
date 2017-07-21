@@ -6,6 +6,7 @@ import aima.core.probability.bayes.ContinuousNode;
 import aima.core.probability.bayes.Node;
 import aima.core.probability.bayes.impl.AbstractNode;
 import aima.core.probability.domain.Domain;
+import org.apache.commons.math3.distribution.ConstantRealDistribution;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.RealDistribution;
 
@@ -64,26 +65,49 @@ public class ContinuousNodeImpl extends AbstractNode implements ContinuousNode {
         return super.getRandomVariable().getDomain();
     }
 
-    public ContinuesConditionalProbabilityDistribution returnCPD(){
-        //if(cpd.getRealDistribution().equals(new NormalDistribution())){
+    public void setValue(double value){
+        if(this.cpd.realDistribution instanceof ConstantRealDistribution){
+            this.cpd.realDistribution = new ConstantRealDistribution(value);
+        }
+    }
+
+    public ContinuesConditionalProbabilityDistribution returnCPD() {
+        if (cpd.getRealDistribution() instanceof NormalDistribution) {
             List<ContinuousNodeImpl> parents = new ArrayList<>();
-            for(Node p: getParents()){
-                parents.add((ContinuousNodeImpl)p);
+            for (Node p : getParents()) {
+                parents.add((ContinuousNodeImpl) p);
             }
-            double offset = this.conditionalProbabilityDistribution.getOffset().get(0);
-            double mean = this.conditionalProbabilityDistribution.getMean().get(0);;
-            if(parents.size() != 0){
-                offset = 0;
+            double std = ((NormalDistribution)this.conditionalProbabilityDistribution.getRealDistribution()).getStandardDeviation();
+            double mean = ((NormalDistribution)this.conditionalProbabilityDistribution.getRealDistribution()).getMean();
+            if (parents.size() != 0) {
+                std = 0;
                 mean = 0;
-                for(ContinuousNodeImpl p:parents){
-                    offset += p.conditionalProbabilityDistribution.getOffset().get(0);
-                    mean += p.conditionalProbabilityDistribution.getMean().get(0);
+                for (ContinuousNodeImpl p : parents) {
+                    if (p.getDomain() instanceof ConstantRealDistribution) {
+                        mean = ((ConstantRealDistribution) p.getDomain()).sample();
+                        std = this.conditionalProbabilityDistribution.getOffset();
+                    } else {
+                        if (p.cpd.getRealDistribution() instanceof NormalDistribution) {
+                            std += p.conditionalProbabilityDistribution.getOffset();
+                            mean += ((NormalDistribution)p.conditionalProbabilityDistribution.getRealDistribution()).getMean()
+                            * p.conditionalProbabilityDistribution.getCoefficient() + p.conditionalProbabilityDistribution.getOffset();
+                        } else if (p.cpd.getRealDistribution() instanceof ConstantRealDistribution) {
+                            //offset += p.cpd.getRealDistribution().sample();
+                            mean += p.cpd.getRealDistribution().sample();
+                        }
+                    }
+                    std = std / parents.size();
+                    mean = mean / parents.size();
                 }
-                offset = offset/parents.size();
-                mean = mean/parents.size();
             }
-            RealDistribution realDistribution = new NormalDistribution(mean, offset);
-        //}
-        return new ContinuesConditionalProbabilityDistribution(realDistribution);
+            RealDistribution realDistribution = new NormalDistribution(mean, std);
+            return new ContinuesConditionalProbabilityDistribution(realDistribution);
+        } else if (cpd.getRealDistribution() instanceof ConstantRealDistribution) {
+            RealDistribution realDistribution = new ConstantRealDistribution(cpd.sample());
+            return new ContinuesConditionalProbabilityDistribution(realDistribution);
+        }else{
+            throw new UnsupportedOperationException("Not implemented yet (" + cpd.getRealDistribution() + ")");
+        }
+
     }
 }

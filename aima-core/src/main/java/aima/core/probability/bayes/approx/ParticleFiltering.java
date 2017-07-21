@@ -144,12 +144,6 @@ public class ParticleFiltering {
 		// local variables: W, a vector of weights of size N
 		double[] W = new double[N];
 
-		if(expected instanceof String){
-			for(int i = 0; i < W.length; i++){
-				sampleFromTransitionModel(i);
-				W[i] = 1.0/N;
-			}
-		}else{
 			// for i = 1 to N do
 			for (int i = 0; i < N; i++) {
 				/* step 1 */
@@ -162,7 +156,6 @@ public class ParticleFiltering {
 				//if(expected instanceof Double){
 					W[i] = ((Double) e[0].getValue()).doubleValue()/((double) expected);
 			}
-		}
 		/* step 3 */
 		// S <- WEIGHTED-SAMPLE-WITH-REPLACEMENT(N, S, W)
 		S = weightedSampleWithReplacement(N, S, W);

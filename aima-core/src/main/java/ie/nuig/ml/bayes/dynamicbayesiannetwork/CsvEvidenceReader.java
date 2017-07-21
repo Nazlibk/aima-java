@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Created by nazli on 13/07/17.
  */
-public class EvidenceReadFromCsv {
+public class CsvEvidenceReader {
     List<Double> time = new ArrayList<>();
     List<Double> values =  new ArrayList<>();
 
@@ -27,7 +27,7 @@ public class EvidenceReadFromCsv {
         return values;
     }
 
-    public EvidenceReadFromCsv(List<Double> time, List<Double> values){
+    public CsvEvidenceReader(List<Double> time, List<Double> values){
         this.time = time;
         this.values = values;
 

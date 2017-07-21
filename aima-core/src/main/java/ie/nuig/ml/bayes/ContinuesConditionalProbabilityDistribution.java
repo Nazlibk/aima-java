@@ -4,6 +4,7 @@ import aima.core.probability.ProbabilityDistribution;
 import aima.core.probability.RandomVariable;
 import aima.core.probability.bayes.ConditionalProbabilityDistribution;
 import aima.core.probability.proposition.AssignmentProposition;
+import org.apache.commons.math3.distribution.ConstantRealDistribution;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.RealDistribution;
 
@@ -21,17 +22,21 @@ public class ContinuesConditionalProbabilityDistribution implements ConditionalP
     private RandomVariable on = null;
     private LinkedHashSet<RandomVariable> discreteParents = new LinkedHashSet<RandomVariable>();
     private LinkedHashSet<RandomVariable> continuousParents = new LinkedHashSet<RandomVariable>();
-    private List<Double> offset = new ArrayList<>();
-    private List<Double> mean = new ArrayList<>();
+    private double offset = 0.0;
+    private double std;
+    private double coefficient = 1.0;
+    private double mean;
 
     public ContinuesConditionalProbabilityDistribution(RealDistribution realDistribution) {
         this.realDistribution = realDistribution;
         if(realDistribution instanceof NormalDistribution){
-            NormalDistribution normalDistribution = (NormalDistribution) realDistribution;
-            offset.add(normalDistribution.getStandardDeviation());
-            mean.add(normalDistribution.getMean());
+            std = ((NormalDistribution) realDistribution).getStandardDeviation();
+            mean = ((NormalDistribution) realDistribution).getMean();
+            offset = this.getOffset();
+            coefficient = this.getCoefficient();
         }
     }
+
 
     public ContinuesConditionalProbabilityDistribution(RealDistribution realDistribution,
                                                        RandomVariable on,
@@ -49,9 +54,10 @@ public class ContinuesConditionalProbabilityDistribution implements ConditionalP
             }
         }
         if(realDistribution instanceof NormalDistribution){
-            NormalDistribution normalDistribution = (NormalDistribution) realDistribution;
-            offset.add(normalDistribution.getStandardDeviation());
-            mean.add(normalDistribution.getMean());
+            std = ((NormalDistribution) realDistribution).getStandardDeviation();
+            mean = ((NormalDistribution) realDistribution).getMean();
+            offset = this.getOffset();
+            coefficient = this.getCoefficient();
         }
 
     }
@@ -101,8 +107,16 @@ public class ContinuesConditionalProbabilityDistribution implements ConditionalP
 
     @Override
     public Object getSample(double probabilityChoice, Object... parentValues) {
-        RealDistribution realDistribution = new NormalDistribution(this.mean.get(0), this.offset.get(0));
-        return realDistribution.sample();
+        if(this.realDistribution instanceof NormalDistribution){
+            RealDistribution realDistribution = new NormalDistribution(this.mean, this.offset);
+            return realDistribution.sample();
+        }
+        else if(this.realDistribution instanceof ConstantRealDistribution){
+            return realDistribution.sample();
+        } else{
+            throw new UnsupportedOperationException("Not implemented yet (" + realDistribution + ")");
+        }
+            //throw new UnsupportedOperationException("Not implemented yet (" + realDistribution + ")");
     }
 
     @Override
@@ -111,11 +125,11 @@ public class ContinuesConditionalProbabilityDistribution implements ConditionalP
     }
 
 
-    public List<Double> getOffset() {
+    public double getOffset() {
         return offset;
     }
 
-    public List<Double> getMean() {
-        return mean;
-    }
+    public double getCoefficient() { return coefficient;}
+
+    public RealDistribution getRealDistribution() { return realDistribution;}
 }
