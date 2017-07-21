@@ -34,8 +34,8 @@ public class DynamicBayesianNetworkTest {
 
     double epsilon = 0.1;
     double a = 0.5;
-    int N = 10;
-    double stepSize = 1.0/32.0;
+    int N = 1000;
+    double stepSize = 1.0/164.0;
     int timeStep = (int)(10/stepSize);
     MockRandomizer mr;
     DBNUtilities dbnUtilities = new DBNUtilities();
